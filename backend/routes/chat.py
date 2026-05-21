@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
+import utils.store as store
 
 load_dotenv()
 
@@ -13,28 +14,30 @@ client = OpenAI(
 )
 
 
-@router.post("/summarize")
-async def summarize(data: dict):
+@router.post("/chat")
+async def chat(data: dict):
 
     try:
 
-        text = data["text"][:2000]
+        question = data["question"]
+
+        notes_context = store.stored_notes[:1000]
 
         prompt = f"""
-        Analyze these study notes and return:
+        You are an AI study assistant.
 
-        # Quick Summary
+        Use these notes to answer the student's question.
 
-        # Key Topics Covered
+        NOTES:
+        {notes_context}
 
-        # Important Exam Questions
+        QUESTION:
+        {question}
 
-        # Difficulty Level
-
-        # Recommended Revision Time
-
-        Notes:
-        {text}
+        Give:
+        - clear explanation
+        - student-friendly answer
+        - examples if needed
         """
 
         response = client.chat.completions.create(
@@ -47,10 +50,10 @@ async def summarize(data: dict):
             ]
         )
 
-        summary = response.choices[0].message.content
+        answer = response.choices[0].message.content
 
         return {
-            "summary": summary
+            "answer": answer
         }
 
     except Exception as e:

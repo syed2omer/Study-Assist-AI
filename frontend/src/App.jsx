@@ -4,6 +4,7 @@ import Home from "./pages/Home"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import Upload from "./pages/Upload"
+import Chat from "./pages/Chat"
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/upload" element={<Upload />} />
+        <Route path="/chat" element={<Chat />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, UploadFile, File
 from pypdf import PdfReader
 import shutil
 import os
+import utils.store as store
 
 router = APIRouter()
 
@@ -11,19 +12,33 @@ UPLOAD_FOLDER = "uploads"
 @router.post("/upload-pdf")
 async def upload_pdf(file: UploadFile = File(...)):
 
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    try:
 
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        file_path = os.path.join(UPLOAD_FOLDER, file.filename)
 
-    reader = PdfReader(file_path)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
 
-    extracted_text = ""
+        reader = PdfReader(file_path)
 
-    for page in reader.pages:
-        extracted_text += page.extract_text()
+        extracted_text = ""
 
-    return {
-        "filename": file.filename,
-        "text": extracted_text[:3000]
-    }
+        for page in reader.pages:
+
+            page_text = page.extract_text()
+
+            if page_text:
+                extracted_text += page_text
+
+        store.stored_notes = extracted_text[:3000]
+
+        return {
+            "filename": file.filename,
+            "text": extracted_text[:3000]
+        }
+
+    except Exception as e:
+
+        return {
+            "error": str(e)
+        }
